@@ -2,14 +2,18 @@
 
 
 #include "MyCharacter.h"
-#include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "CheckPoint.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
+	
+	//make the character rotato without following the camera
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
 }
 
 // Called when the game starts or when spawned
@@ -44,12 +48,22 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void AMyCharacter::MoveForward(float AxisValue)
 {
-	AddMovementInput(GetActorForwardVector() * AxisValue);
+	FRotator Rotation = Controller->GetControlRotation();
+	FRotator YawRotation(0, Rotation.Yaw, 0);
+	
+	FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+	AddMovementInput(Direction, AxisValue);
 }
 
 void AMyCharacter::MoveRight(float AxisValue)
 {
-	AddMovementInput(GetActorRightVector() * AxisValue);
+	FRotator Rotation = Controller->GetControlRotation();
+	FRotator YawRotation(0, Rotation.Yaw, 0);
+
+	FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	
+	AddMovementInput(Direction, AxisValue);
 }
 
 void AMyCharacter::LookUp(float AxisValue)
